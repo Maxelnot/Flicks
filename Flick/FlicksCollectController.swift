@@ -14,8 +14,19 @@ import MBProgressHUD
 class FlicksCollectController: UIViewController, UICollectionViewDelegate,UICollectionViewDataSource {
 
     
+    @IBAction func Tab(_ sender: Any) {
+        self.goingToTableView = true
+        
+        performSegue(withIdentifier: "TabSegue", sender: nil)
+        print("pushed")
+        
+    }
+    
+    var goingToTableView: Bool = false
+    
     @IBOutlet weak var collectionView: UICollectionView!
     var movies:[NSDictionary]?
+    var endpoint: String = ""
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell =
@@ -24,11 +35,11 @@ class FlicksCollectController: UIViewController, UICollectionViewDelegate,UIColl
         let movie = movies![indexPath.row]
         //     let title = movie["title"] as! String
         //   let overview = movie["overview"] as! String
-        let posterPath = movie["poster_path"] as! String
         let baseUrl = "https://image.tmdb.org/t/p/w500"
-        let imageUrl = NSURL(string: baseUrl + posterPath)
-        
-        cell.FilmsView.setImageWith(imageUrl as! URL)
+        if let posterPath = movie["poster_path"] as? String{
+            let imageUrl = NSURL(string: baseUrl + posterPath)
+            cell.FilmsView.setImageWith(imageUrl as! URL)
+        }
         
         print("row \(indexPath.row)")
         return cell
@@ -49,7 +60,7 @@ class FlicksCollectController: UIViewController, UICollectionViewDelegate,UIColl
         // Configure session so that completion handler is executed on main UI thread
         
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = URL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")!
+        let url = URL(string: "https://api.themoviedb.org/3/movie/\(endpoint)?api_key=\(apiKey)")!
         let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
         let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
         let task: URLSessionDataTask = session.dataTask(with: request) { (data: Data?, response: URLResponse?, error: Error?) in
@@ -77,7 +88,7 @@ class FlicksCollectController: UIViewController, UICollectionViewDelegate,UIColl
         collectionView.delegate = self
         
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = URL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")!
+        let url = URL(string: "https://api.themoviedb.org/3/movie/\(endpoint)?api_key=\(apiKey)")!
         let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
         let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
         let task: URLSessionDataTask = session.dataTask(with: request) { (data: Data?, response: URLResponse?, error: Error?) in
@@ -93,20 +104,40 @@ class FlicksCollectController: UIViewController, UICollectionViewDelegate,UIColl
         }
         task.resume()
     }
-    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let selectedCell:UICollectionViewCell = collectionView.cellForItem(at: indexPath)!
+        selectedCell.contentView.backgroundColor = UIColor.black
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
-}
+    }
 
-/*
- // MARK: - Navigation
+
+    // MARK: - Navigation
  
- // In a storyboard-based application, you will often want to do a little preparation before navigation
- override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
- // Get the new view controller using segue.destinationViewController.
- // Pass the selected object to the new view controller.
- }
- */
+    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if goingToTableView{
+            let dest = segue.destination as! FlicksTabsController
+            dest.endpoint = self.endpoint
+            self.goingToTableView = false
+            return
+        }
+        let cell = sender as! UICollectionViewCell
+        let backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.red
+        cell.selectedBackgroundView = backgroundView
+        let indexpath = collectionView.indexPath(for: cell)
+        let movie = movies![indexpath!.row]
+        
+        let filmsViewController = segue.destination as! FilmsViewController
+        filmsViewController.movie = movie
+        
+        //segue.destination as! FlicksTabsController
+        //print(segue.destination)
+        
+    }
+
 
 }

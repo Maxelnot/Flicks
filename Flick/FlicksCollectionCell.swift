@@ -11,4 +11,5 @@ import UIKit
 class FlicksCollectionCell: UICollectionViewCell {
     
     @IBOutlet weak var FilmsView: UIImageView!
+    
 }

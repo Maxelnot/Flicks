@@ -15,12 +15,15 @@ class FlicksTableCell: UITableViewCell {
     @IBOutlet weak var posterView: UIImageView!
     override func awakeFromNib() {
         super.awakeFromNib()
-        // Initialization code
+        let backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.darkGray
+        self.selectedBackgroundView = backgroundView
+        
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
+        
         // Configure the view for the selected state
     }
 
